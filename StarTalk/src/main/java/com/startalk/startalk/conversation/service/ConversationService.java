@@ -19,6 +19,8 @@ public interface ConversationService {
 
     SendMessageResponse sendMessage(Long userId, SendMessageRequest request);
 
+    String speechToText(Long userId, String audioUrl, byte[] audioData);
+
     FeedbackVO getSessionFeedback(Long sessionId);
 
     FeedbackVO generateFeedback(Long userId, Long sessionId);

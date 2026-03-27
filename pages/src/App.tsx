@@ -24,6 +24,7 @@ import {
   VocabBookPage,
 } from "./pages/VocabPages";
 import { DailyChallengePage } from "./pages/ChallengePages";
+import { StudyUnitsPage, UnitTestPage } from "./pages/StudyPages";
 import { Route, UserProfile } from "./types";
 
 export default function App() {
@@ -161,6 +162,14 @@ export default function App() {
         {/* Challenge Pages */}
         {route.id === "daily-challenge" && (
           <DailyChallengePage key="daily-challenge" onBack={goBack} navigate={navigate} />
+        )}
+
+        {/* Study Pages */}
+        {route.id === "study-units" && (
+          <StudyUnitsPage key="study-units" onBack={goBack} navigate={navigate} />
+        )}
+        {route.id === "unit-test" && (
+          <UnitTestPage key="unit-test" params={route.params} onBack={goBack} />
         )}
       </AnimatePresence>
     </div>

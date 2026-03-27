@@ -21,6 +21,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 .excludePathPatterns(
                         "/auth/**",
                         "/user/sendSmsCode",
+                        "/conversation/**",
+                        "/word/**",
                         "/test/**",
                         "/error"
                 );

@@ -109,6 +109,26 @@ export const LearnTab = ({
       </motion.div>
 
       <motion.div
+        onClick={() => navigate("study-units")}
+        className="bg-white dark:bg-slate-800 rounded-[1.5rem] p-5 border-2 border-purple-100 dark:border-purple-900/30 flex items-center justify-between cursor-pointer active:scale-95 transition-transform shadow-sm"
+      >
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-2xl flex items-center justify-center">
+            <Medal size={24} className="text-purple-500" />
+          </div>
+          <div>
+            <h4 className="text-slate-800 dark:text-slate-100 font-extrabold text-lg">
+              单元测验
+            </h4>
+            <p className="text-slate-400 text-xs font-medium mt-0.5">
+              综合评估和错题复习
+            </p>
+          </div>
+        </div>
+        <ChevronRight size={20} className="text-slate-300" />
+      </motion.div>
+
+      <motion.div
         onClick={() => navigate("vocab-book")}
         className="bg-pink-50 dark:bg-pink-900/20 rounded-[1.5rem] p-5 border-2 border-pink-100 dark:border-pink-900/30 flex flex-col items-center justify-center cursor-pointer active:scale-95 transition-transform shadow-sm"
       >

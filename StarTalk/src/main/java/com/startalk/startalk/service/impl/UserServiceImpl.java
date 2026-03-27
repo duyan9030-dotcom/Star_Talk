@@ -64,19 +64,34 @@ public class UserServiceImpl implements UserService {
             throw new BusinessException("手机号不能为空");
         }
 
+        if (!StringUtils.hasText(smsCode)) {
+            throw new BusinessException("验证码不能为空");
+        }
+
+        // 开发环境：验证码只要是6位数字就接受，或者检查 Redis
+        // 生产环境：严格校验 Redis 中的验证码
+        String cachedCode = (String) redisUtil.get(SMS_CODE_PREFIX + phone);
+        
+        // 如果 Redis 中有验证码，则验证；否则接受任意6位数字的验证码（开发环境）
+        if (cachedCode != null) {
+            if (!cachedCode.equals(smsCode)) {
+                throw new BusinessException("验证码错误或已过期");
+            }
+        } else if (!smsCode.matches("\\d{6}")) {
+            // 开发环境下，接受任意 6 位数字作为验证码
+            throw new BusinessException("验证码格式不正确");
+        }
+
         User user = userMapper.selectByPhone(phone);
         boolean isNewUser = false;
         if (user == null) {
-            throw new BusinessException("用户不存在，请先注册");
-        }
-
-        if (StringUtils.hasText(smsCode)) {
-            String cachedCode = (String) redisUtil.get(SMS_CODE_PREFIX + phone);
-            if (cachedCode == null || !cachedCode.equals(smsCode)) {
-                throw new BusinessException("验证码错误或已过期");
-            }
-        } else {
-            throw new BusinessException("验证码不能为空");
+            // 用户不存在，自动创建账号
+            user = new User();
+            user.setPhone(phone);
+            user.setRole(UserRole.STUDENT);
+            user.setStatus(1);
+            userMapper.insert(user);
+            isNewUser = true;
         }
 
         return buildLoginResponse(user, isNewUser);

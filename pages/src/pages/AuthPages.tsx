@@ -4,8 +4,11 @@ import {
   CheckCircle2,
   Smartphone,
   ShieldCheck,
+  AlertCircle,
+  Loader2,
 } from "lucide-react";
 import { PageWrapper } from "../components/Common";
+import { api } from "../services/api";
 
 export const WeChatLoginPage = ({
   onBack,
@@ -61,6 +64,87 @@ export const PhoneLoginPage = ({
 }) => {
   const [phone, setPhone] = useState("");
   const [code, setCode] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [codeSent, setCodeSent] = useState(false);
+  const [countdown, setCountdown] = useState(0);
+
+  const handleSendCode = async () => {
+    if (!phone || phone.length !== 11) {
+      setError("请输入有效的11位手机号");
+      return;
+    }
+    
+    try {
+      setLoading(true);
+      setError("");
+      // 由于后端接口还没准备好，生成一个测试验证码
+      const mockCode = Math.floor(100000 + Math.random() * 900000).toString();
+      
+      // 存储到 localStorage 便于测试
+      localStorage.setItem(`sms_code_${phone}`, mockCode);
+      
+      // 模拟发送延迟
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      setCodeSent(true);
+      setCountdown(60);
+      
+      // 显示验证码（仅限开发环境）
+      alert(`测试验证码: ${mockCode}\n(生产环境将通过短信发送)`);
+      
+      // 倒计时逻辑
+      const interval = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev <= 1) {
+            clearInterval(interval);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    } catch (err: any) {
+      setError(err.message || "发送验证码失败，请重试");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogin = async () => {
+    if (!phone || !code) {
+      setError("请输入手机号和验证码");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError("");
+      
+      // 调用真实的后端登录接口
+      const response = await api.phoneLogin({ phone, smsCode: code });
+      
+      // 从响应中提取 token 和用户信息
+      if (response && response.token) {
+        // 保存 token 到 localStorage
+        localStorage.setItem('token', response.token);
+        localStorage.setItem('user_phone', phone);
+        
+        // 如果返回了用户信息，也可以保存
+        if (response.user) {
+          localStorage.setItem('user_info', JSON.stringify(response.user));
+        }
+        
+        onLogin();
+      } else {
+        setError("登录响应异常，未获取到 token");
+      }
+    } catch (err: any) {
+      setError(err.message || "登录失败，请检查手机号和验证码");
+      console.error("Login error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <PageWrapper
@@ -76,6 +160,13 @@ export const PhoneLoginPage = ({
           未注册的手机号验证后自动创建账号
         </p>
 
+        {error && (
+          <div className="mb-6 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-xl p-3 flex items-start gap-3">
+            <AlertCircle size={18} className="text-red-500 mt-0.5 flex-shrink-0" />
+            <p className="text-sm font-bold text-red-600 dark:text-red-400">{error}</p>
+          </div>
+        )}
+
         <div className="space-y-6">
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -84,7 +175,10 @@ export const PhoneLoginPage = ({
             <input
               type="tel"
               value={phone}
-              onChange={(e) => setPhone(e.target.value)}
+              onChange={(e) => {
+                setPhone(e.target.value);
+                setError("");
+              }}
               placeholder="请输入手机号"
               className="w-full bg-slate-50 dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 rounded-2xl py-4 pl-12 pr-4 font-bold text-slate-700 dark:text-slate-200 outline-none focus:border-blue-400 dark:focus:border-blue-500 transition-colors"
             />
@@ -98,22 +192,33 @@ export const PhoneLoginPage = ({
               <input
                 type="text"
                 value={code}
-                onChange={(e) => setCode(e.target.value)}
+                onChange={(e) => {
+                  setCode(e.target.value);
+                  setError("");
+                }}
                 placeholder="验证码"
-                className="w-full bg-slate-50 dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 rounded-2xl py-4 pl-12 pr-4 font-bold text-slate-700 dark:text-slate-200 outline-none focus:border-blue-400 dark:focus:border-blue-500 transition-colors"
+                disabled={!codeSent}
+                className="w-full bg-slate-50 dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 rounded-2xl py-4 pl-12 pr-4 font-bold text-slate-700 dark:text-slate-200 outline-none focus:border-blue-400 dark:focus:border-blue-500 transition-colors disabled:opacity-50"
               />
             </div>
-            <button className="bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-bold px-6 rounded-2xl active:scale-95 transition-transform whitespace-nowrap">
-              获取验证码
+            <button
+              onClick={handleSendCode}
+              disabled={loading || countdown > 0}
+              className="bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-bold px-6 rounded-2xl active:scale-95 transition-transform whitespace-nowrap disabled:opacity-50"
+            >
+              {loading && <Loader2 size={16} className="inline animate-spin mr-1" />}
+              {countdown > 0 ? `${countdown}s` : "获取验证码"}
             </button>
           </div>
         </div>
 
         <button
-          onClick={onLogin}
-          className="w-full mt-10 bg-blue-500 text-white font-extrabold py-4 rounded-[1.5rem] shadow-lg shadow-blue-500/20 border-b-[6px] border-blue-600 active:border-b-2 active:translate-y-1 transition-all"
+          onClick={handleLogin}
+          disabled={loading}
+          className="w-full mt-10 bg-blue-500 text-white font-extrabold py-4 rounded-[1.5rem] shadow-lg shadow-blue-500/20 border-b-[6px] border-blue-600 active:border-b-2 active:translate-y-1 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
         >
-          登录 / 注册
+          {loading && <Loader2 size={18} className="animate-spin" />}
+          {loading ? "登录中..." : "登录 / 注册"}
         </button>
       </div>
     </PageWrapper>

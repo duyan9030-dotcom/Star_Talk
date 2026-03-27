@@ -5,6 +5,7 @@ import com.startalk.startalk.ai.config.AiConfig;
 import com.startalk.startalk.ai.service.SttService;
 import com.startalk.startalk.exception.BusinessException;
 import okhttp3.*;
+import org.springframework.context.annotation.Primary;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +19,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 @Service
+@Primary
 public class XunfeiSttServiceImpl implements SttService {
 
     @Autowired

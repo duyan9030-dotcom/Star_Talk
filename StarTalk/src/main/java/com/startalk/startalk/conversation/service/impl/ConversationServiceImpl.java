@@ -53,6 +53,10 @@ public class ConversationServiceImpl implements ConversationService {
     @Autowired
     private TtsServiceFacade ttsService;
 
+    @Autowired
+    @org.springframework.beans.factory.annotation.Qualifier("xunfeiSttServiceImpl")
+    private com.startalk.startalk.ai.service.SttService sttService;
+
     @Override
     public List<SceneVO> getSceneList() {
         LambdaQueryWrapper<ConversationScene> wrapper = new LambdaQueryWrapper<>();
@@ -75,9 +79,19 @@ public class ConversationServiceImpl implements ConversationService {
             throw new BusinessException("场景不存在");
         }
 
+        // 检查并自动结束已存在的活跃会话
         ConversationSession activeSession = sessionMapper.selectActiveByUserId(userId);
         if (activeSession != null) {
-            throw new BusinessException("当前有进行中的对话，请先结束");
+            // 自动结束旧的活跃会话
+            System.out.println("[CreateSession] Found active session: " + activeSession.getId() + ", auto-ending it");
+            activeSession.setStatus(SessionStatus.COMPLETED.getCode());
+            activeSession.setEndTime(LocalDateTime.now());
+            if (activeSession.getStartTime() != null) {
+                long minutes = java.time.Duration.between(activeSession.getStartTime(), activeSession.getEndTime()).toMinutes();
+                activeSession.setDuration((int) minutes);
+            }
+            sessionMapper.updateById(activeSession);
+            System.out.println("[CreateSession] Previous session ended: " + activeSession.getId());
         }
 
         ConversationSession session = new ConversationSession();
@@ -179,6 +193,26 @@ public class ConversationServiceImpl implements ConversationService {
         response.setAudioUrl(audioUrl);
         response.setAudioText(aiResponse);
         return response;
+    }
+
+    @Override
+    public String speechToText(Long userId, String audioUrl, byte[] audioData) {
+        if (userId == null || userId <= 0) {
+            throw new BusinessException("用户未登录或非法用户");
+        }
+        if ((audioUrl == null || audioUrl.isEmpty()) && (audioData == null || audioData.length == 0)) {
+            throw new BusinessException("没有传入音频内容");
+        }
+
+        if (audioData != null && audioData.length > 0) {
+            return sttService.speechToText(audioData);
+        }
+
+        if (audioUrl != null && !audioUrl.isEmpty()) {
+            return sttService.speechToText(audioUrl);
+        }
+
+        return "";
     }
 
     @Override

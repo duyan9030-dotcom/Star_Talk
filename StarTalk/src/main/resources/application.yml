@@ -8,7 +8,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/startalk?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
     username: root
-    password: root
+    password: 123456
   redis:
     host: localhost
     port: 6379
@@ -48,16 +48,6 @@ wechat:
 ai:
   provider: chatglm
   chatglm:
-    api-key:  cf59ea5747f24a5e864a390d216735b0.hzw1TB59a4CmvDDN
+    api-key: 769cb0f7bbad4f3d8e5cee63d36ab141.m3T2mr3uwCMAovek
     model: glm-4
     base-url: https://open.bigmodel.cn/api/paas/v4
-  dashscope:
-    api-key: your-dashscope-api-key
-    model: qwen-turbo
-  xunfei:
-    appid: 0654cf8c
-    api-secret: ZmZiNzZlODcwMGRhMDQ2ZTg1ZThlYTNk
-    api-key: 113c0d60efaebcd33ef895458c83db7a
-    stt-url: https://iat-api.xfyun.cn/v2/iat
-    tts-url: wss://tts-api.xfyun.cn/v2/tts
-    tts-voice: xiaoyan

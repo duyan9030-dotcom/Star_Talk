@@ -59,6 +59,14 @@ public class OpenAiLlmServiceImpl implements LlmService {
             String baseUrl = aiConfig.getOpenai().getBaseUrl();
             String model = aiConfig.getOpenai().getModel();
             String apiKey = aiConfig.getOpenai().getApiKey();
+            Double temperature = aiConfig.getOpenai().getTemperature();
+            Integer maxTokens = aiConfig.getOpenai().getMaxTokens();
+            Double topP = aiConfig.getOpenai().getTopP();
+
+            // 处理环境变量
+            if (apiKey != null && apiKey.startsWith("$")) {
+                apiKey = System.getenv(apiKey.substring(1));
+            }
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
@@ -73,9 +81,21 @@ public class OpenAiLlmServiceImpl implements LlmService {
             }
             msgs.addAll(messages);
             body.put("messages", msgs);
+            
+            // 设置参数
+            if (temperature != null) {
+                body.put("temperature", temperature);
+            }
+            if (maxTokens != null) {
+                body.put("max_tokens", maxTokens);
+            }
+            if (topP != null) {
+                body.put("top_p", topP);
+            }
 
             HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
-            String url = baseUrl + "/v1/chat/completions";
+            // 构建 URL - 支持 NVIDIA 风格的完整 base_url
+            String url = baseUrl.endsWith("/") ? baseUrl + "chat/completions" : baseUrl + "/chat/completions";
             ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.POST, entity, Map.class);
 
             if (response.getBody() != null && response.getBody().containsKey("choices")) {
