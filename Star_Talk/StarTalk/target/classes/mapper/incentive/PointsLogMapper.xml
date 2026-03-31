@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.startalk.startalk.incentive.mapper.PointsLogMapper">
+
+    <resultMap id="BaseResultMap" type="com.startalk.startalk.incentive.entity.PointsLog">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="points" property="points"/>
+        <result column="type" property="type"/>
+        <result column="source" property="source"/>
+        <result column="description" property="description"/>
+        <result column="create_time" property="createTime"/>
+        <result column="deleted" property="deleted"/>
+    </resultMap>
+
+    <select id="selectByUserId" resultMap="BaseResultMap">
+        SELECT * FROM points_log
+        WHERE user_id = #{userId} AND deleted = 0
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="selectTotalPoints" resultType="java.lang.Long">
+        SELECT COALESCE(SUM(points), 0) FROM points_log
+        WHERE points > 0 AND deleted = 0
+    </select>
+
+</mapper>

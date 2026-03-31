@@ -2,7 +2,8 @@ package com.startalk.startalk.enums;
 
 public enum UserRole {
     STUDENT("STUDENT", "学生"),
-    PARENT("PARENT", "家长");
+    PARENT("PARENT", "家长"),
+    ADMIN("ADMIN", "管理员");
 
     private final String code;
     private final String description;

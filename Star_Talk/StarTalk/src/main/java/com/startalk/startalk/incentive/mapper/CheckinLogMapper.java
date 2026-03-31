@@ -16,4 +16,6 @@ public interface CheckinLogMapper extends BaseMapper<CheckinLog> {
     List<CheckinLog> selectByUserIdAndMonth(@Param("userId") Long userId, @Param("year") Integer year, @Param("month") Integer month);
 
     Integer countConsecutiveDays(@Param("userId") Long userId);
+
+    Long selectTodayCount();
 }

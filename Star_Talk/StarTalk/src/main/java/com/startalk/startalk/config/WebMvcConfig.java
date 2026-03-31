@@ -24,7 +24,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
                         "/conversation/**",
                         "/word/**",
                         "/test/**",
-                        "/error"
+                        "/error",
+                        "/admin/auth/login"
                 );
     }
 

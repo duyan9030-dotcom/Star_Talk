@@ -13,7 +13,7 @@ CREATE TABLE sys_user (
     avatar VARCHAR(500) COMMENT '头像URL',
     age INT COMMENT '年龄',
     grade VARCHAR(20) COMMENT '年级',
-    role VARCHAR(20) NOT NULL DEFAULT 'STUDENT' COMMENT '角色: STUDENT-学生, PARENT-家长',
+    role VARCHAR(20) NOT NULL DEFAULT 'STUDENT' COMMENT '角色: STUDENT-学生, PARENT-家长, ADMIN-管理员',
     status INT NOT NULL DEFAULT 1 COMMENT '状态: 0-禁用, 1-正常',
     password VARCHAR(128) COMMENT '密码(预留)',
     create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
@@ -435,3 +435,77 @@ INSERT INTO word (word, phonetic, meaning, part_of_speech, example_sentence, exa
 ('orange', '/ˈɔːrɪndʒ/', '橙子', 'n.', 'I like orange juice.', '我喜欢橙汁。', 1, 'fruit'),
 ('hello', '/həˈloʊ/', '你好', 'int.', 'Hello, how are you?', '你好，你好吗？', 1, 'greeting'),
 ('thank', '/θæŋk/', '感谢', 'v.', 'Thank you very much.', '非常感谢你。', 1, 'greeting');
+
+-- 管理员表
+DROP TABLE IF EXISTS sys_admin;
+CREATE TABLE sys_admin (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '管理员ID',
+    username VARCHAR(50) NOT NULL COMMENT '用户名',
+    password VARCHAR(128) NOT NULL COMMENT '密码(BCrypt加密)',
+    nickname VARCHAR(50) COMMENT '昵称',
+    avatar VARCHAR(500) COMMENT '头像URL',
+    phone VARCHAR(20) COMMENT '手机号',
+    email VARCHAR(100) COMMENT '邮箱',
+    status INT NOT NULL DEFAULT 1 COMMENT '状态: 0-禁用, 1-正常',
+    create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    deleted TINYINT NOT NULL DEFAULT 0 COMMENT '逻辑删除',
+    UNIQUE KEY uk_username (username),
+    INDEX idx_status (status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='管理员表';
+
+-- 单词分类表
+DROP TABLE IF EXISTS word_category;
+CREATE TABLE word_category (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL COMMENT '分类名称',
+    name_en VARCHAR(50) COMMENT '英文名称',
+    parent_id BIGINT DEFAULT 0 COMMENT '父分类ID',
+    sort INT DEFAULT 0 COMMENT '排序',
+    status INT DEFAULT 1 COMMENT '状态: 0-禁用, 1-正常',
+    create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    deleted TINYINT NOT NULL DEFAULT 0 COMMENT '逻辑删除',
+    INDEX idx_parent_id (parent_id),
+    INDEX idx_status (status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='单词分类表';
+
+-- 系统设置表
+DROP TABLE IF EXISTS system_setting;
+CREATE TABLE system_setting (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    setting_key VARCHAR(100) NOT NULL COMMENT '配置键',
+    setting_value VARCHAR(500) COMMENT '配置值',
+    description VARCHAR(200) COMMENT '描述',
+    `group` VARCHAR(50) COMMENT '分组',
+    sort INT DEFAULT 0 COMMENT '排序',
+    create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    deleted TINYINT NOT NULL DEFAULT 0 COMMENT '逻辑删除',
+    UNIQUE KEY uk_setting_key (setting_key),
+    INDEX idx_group (`group`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='系统设置表';
+
+-- 插入默认管理员 (密码: admin123)
+INSERT INTO sys_admin (username, password, nickname, phone, email, status) VALUES
+('admin', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', '超级管理员', '13800138000', 'admin@startalk.com', 1);
+
+-- 插入默认单词分类
+INSERT INTO word_category (name, name_en, parent_id, sort, status) VALUES
+('水果', 'Fruit', 0, 1, 1),
+('动物', 'Animal', 0, 2, 1),
+('颜色', 'Color', 0, 3, 1),
+('数字', 'Number', 0, 4, 1),
+('家庭', 'Family', 0, 5, 1);
+
+-- 插入系统默认设置
+INSERT INTO system_setting (setting_key, setting_value, description, `group`, sort) VALUES
+('site_name', 'StarTalk', '网站名称', 'basic', 1),
+('site_logo', '/logo.png', '网站Logo', 'basic', 2),
+('ai_model', 'chatglm', '默认AI模型', 'ai', 1),
+('ai_temperature', '0.7', 'AI温度参数', 'ai', 2),
+('max_tokens', '2000', '最大Token数', 'ai', 3),
+('daily_word_limit', '20', '每日单词学习上限', 'learning', 1),
+('points_conversation', '10', '对话积分奖励', 'points', 1),
+('points_checkin', '5', '签到积分奖励', 'points', 2),
+('version', '1.0.0', '系统版本', 'system', 1);

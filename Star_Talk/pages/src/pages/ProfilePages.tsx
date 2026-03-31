@@ -69,6 +69,25 @@ export const SettingsPage = ({
   const [scheduleStart, setScheduleStart] = useState('21:00');
   const [scheduleEnd, setScheduleEnd] = useState('08:00');
   const [cacheSize, setCacheSize] = useState(128);
+  const [versionClicks, setVersionClicks] = useState(0);
+  const [lastClickTime, setLastClickTime] = useState(0);
+
+  const handleVersionClick = () => {
+    const now = Date.now();
+    // 如果距离上次点击超过500ms，重置计数
+    if (now - lastClickTime > 500) {
+      setVersionClicks(1);
+    } else {
+      setVersionClicks(prev => prev + 1);
+    }
+    setLastClickTime(now);
+
+    // 达到3次点击后进入管理员模式
+    if (versionClicks >= 2) {
+      navigate("admin-dashboard");
+      setVersionClicks(0);
+    }
+  };
 
   const ToggleItem2 = ({ icon, label, checked, onChange, subtitle }: any) => (
     <div className="flex items-center justify-between p-4 border-b border-slate-50 dark:border-slate-700/50 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
@@ -219,7 +238,7 @@ export const SettingsPage = ({
               清除
             </button>
           </div>
-          <div className="flex items-center justify-between p-4 cursor-pointer rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+          <div className="flex items-center justify-between p-4 cursor-pointer rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors" onClick={handleVersionClick}>
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-slate-50 dark:bg-slate-700 rounded-full flex items-center justify-center">
                 <MessageCircle size={20} className="text-slate-500" />
@@ -228,7 +247,7 @@ export const SettingsPage = ({
                 <span className="font-bold text-slate-700 dark:text-slate-200 block">
                   关于我们
                 </span>
-                <p className="text-xs text-slate-400 mt-1">v1.0.0</p>
+                <p className="text-xs text-slate-400 mt-1">v1.0.0 {versionClicks > 0 && `(${versionClicks}/3)`}</p>
               </div>
             </div>
             <ChevronRight size={18} className="text-slate-400" />

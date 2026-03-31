@@ -30,8 +30,13 @@ public class JwtInterceptor implements HandlerInterceptor {
 
         try {
             Claims claims = jwtUtil.getClaimsFromToken(token);
-            request.setAttribute("userId", Long.valueOf(claims.getSubject()));
-            request.setAttribute("role", claims.get("role"));
+            String role = (String) claims.get("role");
+            if ("ADMIN".equals(role)) {
+                request.setAttribute("adminId", Long.valueOf(claims.getSubject()));
+            } else {
+                request.setAttribute("userId", Long.valueOf(claims.getSubject()));
+            }
+            request.setAttribute("role", role);
             return true;
         } catch (Exception e) {
             throw new BusinessException(401, "登录已过期，请重新登录");

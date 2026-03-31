@@ -29,4 +29,9 @@
         LIMIT 1
     </select>
 
+    <select id="selectTodayCount" resultType="java.lang.Long">
+        SELECT COUNT(*) FROM conversation_session
+        WHERE DATE(create_time) = CURDATE() AND deleted = 0
+    </select>
+
 </mapper>

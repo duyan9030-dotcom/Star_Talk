@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.startalk.startalk.incentive.mapper.CheckinLogMapper">
+
+    <resultMap id="BaseResultMap" type="com.startalk.startalk.incentive.entity.CheckinLog">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="checkin_date" property="checkinDate"/>
+        <result column="duration" property="duration"/>
+        <result column="create_time" property="createTime"/>
+        <result column="deleted" property="deleted"/>
+    </resultMap>
+
+    <select id="selectByUserIdAndDate" resultMap="BaseResultMap">
+        SELECT * FROM checkin_log
+        WHERE user_id = #{userId} AND checkin_date = #{date} AND deleted = 0
+        LIMIT 1
+    </select>
+
+    <select id="selectByUserIdAndMonth" resultMap="BaseResultMap">
+        SELECT * FROM checkin_log
+        WHERE user_id = #{userId}
+        AND YEAR(checkin_date) = #{year}
+        AND MONTH(checkin_date) = #{month}
+        AND deleted = 0
+        ORDER BY checkin_date
+    </select>
+
+    <select id="selectTodayCount" resultType="java.lang.Long">
+        SELECT COUNT(*) FROM checkin_log
+        WHERE DATE(create_time) = CURDATE() AND deleted = 0
+    </select>
+
+</mapper>

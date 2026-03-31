@@ -13,4 +13,6 @@ public interface SessionMapper extends BaseMapper<ConversationSession> {
     List<ConversationSession> selectByUserId(@Param("userId") Long userId);
 
     ConversationSession selectActiveByUserId(@Param("userId") Long userId);
+
+    Long selectTodayCount();
 }

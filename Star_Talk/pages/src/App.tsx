@@ -27,6 +27,13 @@ import {
 } from "./pages/VocabPages";
 import { DailyChallengePage } from "./pages/ChallengePages";
 import { StudyUnitsPage, UnitTestPage } from "./pages/StudyPages";
+import {
+  AdminDashboardPage,
+  AdminUsersPage,
+  AdminStatsPage,
+  AdminContentPage,
+  AdminSettingsPage,
+} from "./pages/AdminPages";
 import { Route, UserProfile } from "./types";
 
 export default function App() {
@@ -46,8 +53,10 @@ export default function App() {
   useEffect(() => {
     if (darkMode) {
       document.documentElement.classList.add("dark");
+      document.documentElement.style.colorScheme = "dark";
     } else {
       document.documentElement.classList.remove("dark");
+      document.documentElement.style.colorScheme = "light";
     }
   }, [darkMode]);
 
@@ -139,8 +148,12 @@ export default function App() {
         {route.id === "feedback" && (
           <FeedbackPage key="feedback" onBack={goBack} />
         )}
-        {route.id === "badges" && <BadgesPage key="badges" onBack={goBack} />}
-        {route.id === "notifications" && <NotificationsPage key="notifications" onBack={goBack} />}
+        {route.id === "badges" && (
+          <BadgesPage key="badges" onBack={goBack} />
+        )}
+        {route.id === "notifications" && (
+          <NotificationsPage key="notifications" onBack={goBack} />
+        )}
 
         {/* AI Pages */}
         {route.id === "ai-history" && (
@@ -178,6 +191,23 @@ export default function App() {
         )}
         {route.id === "unit-test" && (
           <UnitTestPage key="unit-test" params={route.params} onBack={goBack} />
+        )}
+
+        {/* Admin Pages */}
+        {route.id === "admin-dashboard" && (
+          <AdminDashboardPage key="admin-dashboard" onBack={goBack} navigate={navigate} />
+        )}
+        {route.id === "admin-users" && (
+          <AdminUsersPage key="admin-users" onBack={() => navigate("admin-dashboard")} />
+        )}
+        {route.id === "admin-stats" && (
+          <AdminStatsPage key="admin-stats" onBack={() => navigate("admin-dashboard")} />
+        )}
+        {route.id === "admin-content" && (
+          <AdminContentPage key="admin-content" onBack={() => navigate("admin-dashboard")} />
+        )}
+        {route.id === "admin-settings" && (
+          <AdminSettingsPage key="admin-settings" onBack={() => navigate("admin-dashboard")} />
         )}
       </AnimatePresence>
     </div>

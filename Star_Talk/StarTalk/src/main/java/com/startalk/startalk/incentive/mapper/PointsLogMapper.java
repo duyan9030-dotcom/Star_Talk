@@ -13,4 +13,6 @@ public interface PointsLogMapper extends BaseMapper<PointsLog> {
     List<PointsLog> selectByUserId(@Param("userId") Long userId);
 
     Integer countTodayBySource(@Param("userId") Long userId, @Param("source") String source);
+
+    Long selectTotalPoints();
 }
